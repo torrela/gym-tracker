@@ -28,7 +28,7 @@ button{font:inherit;color:var(--tx);cursor:pointer}
 .sum div{background:var(--card);border-radius:16px;padding:12px 14px;box-shadow:var(--sh);border:1px solid var(--bd)}
 .sum b{display:block;font-size:20px;line-height:1.2;overflow-wrap:anywhere}
 .sum span{font-size:13px;color:var(--mu)}
-.tabs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-bottom:12px}
+.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;margin-bottom:12px}
 .tabs button{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:8px 0 6px;font-size:13px;line-height:1.25;position:relative;color:var(--mu)}
 .tabs i{display:block;font-style:normal;font-weight:700;font-size:17px;color:var(--tx)}
 .tabs button.on{background:linear-gradient(135deg,var(--g1),var(--g2));border-color:transparent;color:#fff}
@@ -74,7 +74,7 @@ h2{font-size:16px;margin:0 0 4px}
 @media(max-width:380px){.hero{padding:14px}.cnt{font-size:22px}}
 </style></head><body><main id="app"></main>
 <script>
-const D=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"],K="gymtracker.v1";
+const D=["Lun","Mar","Mié","Jue","Vie"],K="gymtracker.v1";
 const u=()=>Math.random().toString(36).slice(2,8);
 const E=(id,n,d)=>({id,name:n,detail:d||""});
 let S,ws,sel;
@@ -96,41 +96,41 @@ const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
 const pad=n=>String(n).padStart(2,"0");
 const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 function monday(d){d=new Date(d);d.setHours(12,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d}
-ws=monday(new Date());sel=(new Date().getDay()+6)%7;
+ws=monday(new Date());sel=Math.min(4,(new Date().getDay()+6)%7);
 const dayDate=i=>{const d=new Date(ws);d.setDate(d.getDate()+i);return d};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fmt=n=>Math.round(n).toLocaleString("es-ES");
 function log(k){return S.logs[k]||(S.logs[k]={steps:"",ex:{}})}
-function lastW(id,k){let b=null;for(const d in S.logs){const e=S.logs[d].ex[id];if(d<k&&e&&e.w!==""&&e.w!=null&&(!b||d>b.d))b={d,w:e.w}}return b&&b.w}
+function lastW(id,k){let b=null;for(const d in S.logs){const e=S.logs[d].ex[id];if(d<k&&e&&e.w!==""&&e.w!=null&&(!b||d>b.d))b={d,w:e.w}}return b}
 function nav(n){ws.setDate(ws.getDate()+7*n);R()}
-function today(){ws=monday(new Date());sel=(new Date().getDay()+6)%7;R()}
+function today(){ws=monday(new Date());sel=Math.min(4,(new Date().getDay()+6)%7);R()}
 function pick(i){sel=i;R()}
 function setSteps(v){log(iso(dayDate(sel))).steps=v;save();R()}
 function setGoal(v){S.goal=Math.max(1,+v||10000);save();R()}
 function chk(id,v){const e=log(iso(dayDate(sel))).ex;(e[id]=e[id]||{d:false,w:""}).d=v;save();R()}
 function wt(id,v){const e=log(iso(dayDate(sel))).ex;(e[id]=e[id]||{d:false,w:""}).w=v;save();R()}
-function name(v){S.names[sel]=v;save();R()}
+function setName(v){S.names[sel]=v;save();R()}
 function addEx(){const f=id=>document.getElementById(id).value.trim();
 const n=f("an");if(!n)return;S.routine[sel].push(E(u(),n,f("ad")));save();R()}
 function delEx(id){if(!confirm("¿Quitar este ejercicio de la rutina del día?"))return;
 S.routine[sel]=S.routine[sel].filter(e=>e.id!==id);save();R()}
 function R(){
 let tot=0,done=0,st=0,sd=0,gd=0;
-const DN=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
-const days=[...Array(7)].map((_,i)=>{const k=iso(dayDate(i)),l=S.logs[k]||{ex:{}},ex=S.routine[i]||[];
+const DN=["Lunes","Martes","Miércoles","Jueves","Viernes"];
+const days=[...Array(5)].map((_,i)=>{const k=iso(dayDate(i)),l=S.logs[k]||{ex:{}},ex=S.routine[i]||[];
 const dn=ex.filter(e=>l.ex[e.id]&&l.ex[e.id].d).length,s=+l.steps||0;
 tot+=ex.length;done+=dn;st+=s;if(s)sd++;if(s>=S.goal)gd++;
 return{k,full:ex.length>0&&dn===ex.length}});
 const d=dayDate(sel),k=days[sel].k,l=S.logs[k]||{steps:"",ex:{}},ex=S.routine[sel]||[],s=+l.steps||0;
 const dn=ex.filter(e=>l.ex[e.id]&&l.ex[e.id].d).length;
 const C=2*Math.PI*34,pc=Math.min(1,s/S.goal);
-const a=dayDate(0),b=dayDate(6),mo=x=>x.toLocaleDateString("es-ES",{day:"numeric",month:"short"});
+const a=dayDate(0),b=dayDate(4),mo=x=>x.toLocaleDateString("es-ES",{day:"numeric",month:"short"});
 document.getElementById("app").innerHTML=`
 <header class="hero"><div class="top"><div><h1>Gym y pasos</h1><p>${mo(a)} – ${mo(b)} ${b.getFullYear()}</p></div>
 <div class="nav"><button onclick="nav(-1)" aria-label="Semana anterior">‹</button><button onclick="today()">Hoy</button><button onclick="nav(1)" aria-label="Semana siguiente">›</button></div></div></header>
-<div class="sum"><div><b>${done}/${tot}</b><span>Ejercicios hechos</span></div><div><b>${fmt(st)}</b><span>Pasos totales</span></div><div><b>${fmt(sd?st/sd:0)}</b><span>Media diaria</span></div><div><b>${gd}/7</b><span>Días con meta</span></div></div>
+<div class="sum"><div><b>${done}/${tot}</b><span>Ejercicios hechos</span></div><div><b>${fmt(st)}</b><span>Pasos totales</span></div><div><b>${fmt(sd?st/sd:0)}</b><span>Media diaria</span></div><div><b>${gd}/5</b><span>Días con meta</span></div></div>
 <div class="tabs">${days.map((x,i)=>`<button class="${i===sel?"on":""}" onclick="pick(${i})" aria-label="${DN[i]}">${D[i]}<i>${dayDate(i).getDate()}</i><em class="${x.full?"f":""}"></em></button>`).join("")}</div>
-<section class="card"><div class="dh"><div><small>${DN[sel]} ${d.getDate()}</small><input class="nm" type="text" value="${esc(S.names[sel]||"")}" placeholder="Nombre de la rutina" aria-label="Nombre de la rutina" onchange="name(this.value)"></div>
+<section class="card"><div class="dh"><div><small>${DN[sel]} ${d.getDate()}</small><input class="nm" type="text" value="${esc(S.names[sel]||"")}" placeholder="Nombre de la rutina" aria-label="Nombre de la rutina" onchange="setName(this.value)"></div>
 <div class="cnt">${dn}/${ex.length}</div></div><div class="bar"><i style="width:${ex.length?dn/ex.length*100:0}%"></i></div></section>
 <section class="card"><div class="steps"><div class="ring"><svg width="88" height="88" viewBox="0 0 88 88"><circle cx="44" cy="44" r="34" fill="none" stroke="var(--bd)" stroke-width="9"/><circle cx="44" cy="44" r="34" fill="none" stroke="${s>=S.goal?"var(--ok)":"var(--ac)"}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(pc*C).toFixed(1)} ${C.toFixed(1)}"/></svg><b>${Math.round(pc*100)}%</b></div>
 <div class="sf"><div><label>Pasos del día</label><input type="number" inputmode="numeric" min="0" value="${l.steps}" placeholder="0" onchange="setSteps(this.value)"></div>
@@ -139,7 +139,7 @@ document.getElementById("app").innerHTML=`
 <section class="card"><h2>Ejercicios</h2><p class="empty">RIR = repeticiones que te quedan en reserva. Termina cada serie con ese margen para no acumular fatiga.</p>${ex.length?ex.map(e=>{const g=l.ex[e.id]||{d:false,w:""},lw=lastW(e.id,k);
 return`<div class="ex${g.d?" ok":""}"><input type="checkbox" ${g.d?"checked":""} onchange="chk('${e.id}',this.checked)" aria-label="Hecho">
 <div class="info"><b>${esc(e.name)}</b>${e.detail?`<span>${esc(e.detail)}</span>`:""}</div>
-<div class="ctl"><label class="kg"><input type="number" inputmode="decimal" step="0.5" min="0" value="${g.w}" placeholder="${lw||"0"}" onchange="wt('${e.id}',this.value)" aria-label="Peso en kg"><span>kg</span></label>${lw?`<small>Último: ${lw} kg</small>`:""}<button class="x" onclick="delEx('${e.id}')">Quitar</button></div></div>`}).join(""):`<div class="empty">Día de descanso o sin ejercicios. Añade uno abajo.</div>`}
+<div class="ctl"><label class="kg"><input type="number" inputmode="decimal" step="0.5" min="0" value="${g.w}" placeholder="${lw?lw.w:"0"}" onchange="wt('${e.id}',this.value)" aria-label="Peso en kg"><span>kg</span></label>${lw?`<small>Última vez: ${lw.w} kg · ${mo(new Date(lw.d+"T12:00"))}</small>`:""}<button class="x" onclick="delEx('${e.id}')">Quitar</button></div></div>`}).join(""):`<div class="empty">Día de descanso o sin ejercicios. Añade uno abajo.</div>`}
 <div class="add"><input type="text" id="an" placeholder="Nuevo ejercicio" aria-label="Nombre del ejercicio"><input type="text" id="ad" placeholder="Ej. 3 x 8" aria-label="Series y repeticiones"><button class="p" onclick="addEx()">Añadir</button></div></section>`}
 save();R();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
