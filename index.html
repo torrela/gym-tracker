@@ -10,17 +10,20 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#14110d">
 <style>
-:root{--bg:#14110d;--card:#1d1913;--tx:#f4ecdc;--mu:#a39a88;--ac:#d9981f;--bd:#3d3527;--ln:#3a3328;--sf:#2c261b;--hi:#f4ecdc;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+:root{--bg:#14110d;--card:#1d1913;--tx:#f4ecdc;--mu:#a39a88;--ac:#d9981f;--bd:#3d3527;--ln:#3a3328;--sf:#2c261b;--hi:#f4ecdc;color-scheme:dark}
 :root[data-theme="light"]{--bg:#f2e9d8;--card:#fffdf8;--tx:#161412;--mu:#6f675a;--ac:#c4841a;--bd:#161412;--ln:#d8cdb6;--sf:#e9dfca;--hi:#161412;color-scheme:light}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
-main{max-width:640px;margin:0 auto;padding:18px 16px calc(96px + env(safe-area-inset-bottom,0px))}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+.page{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.in{max-width:640px;margin:0 auto;padding:18px 16px 24px}
 button{font:inherit;color:var(--tx);cursor:pointer}
 h1{font-size:32px;font-weight:800;letter-spacing:-.03em;margin:0;line-height:1.1}
 .sub{font:italic 17px/1.3 Georgia,"Times New Roman",serif;color:var(--mu);margin:4px 0 6px}
 h2{font-size:15px;font-weight:700;margin:22px 0 10px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 h2 span{font-weight:500;color:var(--mu);font-size:14px}
+h1+.card{margin-top:14px}
 .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .ib{background:var(--card);border:1.5px solid var(--bd);border-radius:12px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;padding:0;font-size:24px;line-height:1}
 .ic{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
@@ -82,7 +85,7 @@ input:focus{outline:2px solid var(--ac);outline-offset:1px}
 .bar{height:10px;background:var(--sf);border-radius:6px;overflow:hidden;margin-top:8px}
 .bar i{display:block;height:100%;background:var(--ac)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.tb{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1.5px solid var(--bd);z-index:10;padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px))}
+.tb{flex:none;background:var(--card);border-top:1.5px solid var(--bd);padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px))}
 .tb div{display:flex;max-width:640px;margin:0 auto}
 .tb button{flex:1;min-width:0;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--mu);padding:4px 0}
 .tb button.on{color:var(--ac)}
@@ -118,7 +121,7 @@ if(!S)S=mig(Object.assign({goal:10000,logs:{}},routineV2()));else if(!S.routines
 document.documentElement.dataset.theme=S.theme||"dark";
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
 let V="reg",wo=0,cm=new Date(),cd=iso(new Date()),A="";cm=new Date(cm.getFullYear(),cm.getMonth(),1);
-const setV=v=>{V=v;A="";window.scrollTo(0,0);R()};
+let TOP=false;const setV=v=>{V=v;A="";TOP=true;R()};
 const theme=()=>{S.theme=S.theme==="light"?"dark":"light";document.documentElement.dataset.theme=S.theme;save()};
 const ask=k=>{if(A===k){A="";return true}A=k;R();return false};
 const setSteps=v=>{S.steps[iso(new Date())]=+v||0;save();R()};
@@ -179,12 +182,12 @@ ${x.sets.map((s,i)=>`<div class="st${s.d?" ok":""}"><span class="sn">${i+1}</spa
 <div class="sa"><button onclick="addSet('${e.id}')">+ Serie</button>${x.sets.length>1?`<button onclick="delSet('${e.id}')">− Serie</button>`:""}</div></div>`}).join("")}
 <div class="add"><input type="text" id="sn" placeholder="+ Añadir ejercicio a la sesión"><input type="text" id="sd" placeholder="Ej. 3 x 8"><button onclick="addSEx()">Añadir</button></div>
 <button class="dng" onclick="discard()">${A==="dis"?"¿Seguro? Toca otra vez":c.ed?"Eliminar sesión":"Descartar sesión"}</button>`}
-function rutV(){return`<h1>Rutinas</h1><p class="sub">Edita nombres, ejercicios y series</p>`+S.routines.map(r=>`<div class="card"><input class="nm" type="text" value="${esc(r.name)}" onchange="rn('${r.id}',this.value)" aria-label="Nombre de la rutina">
+function rutV(){return`<h1>Rutinas</h1>`+S.routines.map(r=>`<div class="card"><input class="nm" type="text" value="${esc(r.name)}" onchange="rn('${r.id}',this.value)" aria-label="Nombre de la rutina">
 ${r.ex.map(e=>`<div class="er"><input type="text" value="${esc(e.name)}" onchange="ee('${r.id}','${e.id}','name',this.value)" aria-label="Ejercicio"><input type="text" value="${esc(e.detail||"")}" placeholder="3 x 8" onchange="ee('${r.id}','${e.id}','detail',this.value)" aria-label="Series y repeticiones"><button onclick="delEx('${r.id}','${e.id}')" aria-label="Quitar">${A==="d"+e.id?"¿Seguro?":"✕"}</button></div>`).join("")}
 <div class="add" style="margin-top:12px"><input type="text" id="an_${r.id}" placeholder="+ Nuevo ejercicio"><input type="text" id="ad_${r.id}" placeholder="Ej. 3 x 8"><button onclick="addEx('${r.id}')">Añadir</button></div>
 <button class="dng" onclick="delR('${r.id}')">${A==="r"+r.id?"¿Seguro? Toca otra vez":"Eliminar rutina"}</button></div>`).join("")+`<button class="card free" onclick="addR()">+ Nueva rutina</button>`}
 function progV(){const ns=[...new Set(S.sessions.flatMap(s=>s.list.map(e=>e.name)))].map(n=>({n,h:hist(n)})).filter(x=>x.h.length).sort((a,b)=>b.h[b.h.length-1].d.localeCompare(a.h[a.h.length-1].d));
-return`<h1>Progreso</h1><p class="sub">Tu peso máximo por ejercicio</p><h2>Ejercicios <span>${ns.length} con registros</span></h2>`+(ns.length?ns.map(({n,h})=>`<div class="card"><div class="row"><b>${esc(n)}</b><span class="chip">Mejor ${Math.max(...h.map(x=>x.w))} kg</span></div>${spark(h)}<div class="chips">${h.slice(-5).map(x=>`<span class="chip">${mo(dt(x.d))} · ${x.w} kg</span>`).join("")}</div></div>`).join(""):'<div class="empty">Aún no hay pesos registrados. Termina una sesión con series marcadas y aquí verás cómo evolucionan.</div>')}
+return`<h1>Progreso</h1><h2>Ejercicios <span>${ns.length} con registros</span></h2>`+(ns.length?ns.map(({n,h})=>`<div class="card"><div class="row"><b>${esc(n)}</b><span class="chip">Mejor ${Math.max(...h.map(x=>x.w))} kg</span></div>${spark(h)}<div class="chips">${h.slice(-5).map(x=>`<span class="chip">${mo(dt(x.d))} · ${x.w} kg</span>`).join("")}</div></div>`).join(""):'<div class="empty">Aún no hay pesos registrados. Termina una sesión con series marcadas y aquí verás cómo evolucionan.</div>')}
 function calV(){const y=cm.getFullYear(),m=cm.getMonth(),off=(new Date(y,m,1).getDay()+6)%7,n=Math.ceil((off+new Date(y,m+1,0).getDate())/7)*7,s0=addD(new Date(y,m,1,12),-off);
 const cells=[...Array(n)].map((_,i)=>{const d=addD(s0,i),k=iso(d);return`<button class="${d.getMonth()!==m?"o":""} ${S.sessions.some(s=>s.date===k)?"f":""} ${k===cd?"on":""}" onclick="pickD('${k}')">${d.getDate()}</button>`}).join("");
 const sp=+S.steps[cd]||0;
@@ -194,14 +197,14 @@ return`<h1>Calendario</h1><div class="wk"><button onclick="mv(-1)" aria-label="M
 function resV(){const w=addD(monday(new Date()),7*wo),a=iso(w),b=iso(addD(w,6)),ss=S.sessions.filter(s=>s.date>=a&&s.date<=b),tv=ss.reduce((t,s)=>t+vol(s),0),tt=ss.reduce((t,s)=>t+(s.dur||0),0);
 let sp=0,sd=0,gd=0;for(let i=0;i<7;i++){const x=+S.steps[iso(addD(w,i))]||0;sp+=x;if(x)sd++;if(x>=S.goal)gd++}
 const mx=Math.max(1,...ss.map(vol));
-return`<h1>Resumen</h1><p class="sub">Semana del ${mo(w)} al ${mo(addD(w,6))}</p>
+return`<h1>Resumen</h1>
 <div class="wk"><button onclick="nw(-1)" aria-label="Semana anterior">‹</button><button onclick="nw0()">Esta semana</button><button onclick="nw(1)" aria-label="Semana siguiente">›</button></div>
-<h2>Semana</h2><div class="sum"><div><b>${ss.length}/${S.routines.length}</b><span>Entrenos</span></div><div><b>${fmt(tv)} kg</b><span>Volumen total</span></div><div><b>${tt} min</b><span>Tiempo entrenando</span></div><div><b>${fmt(sp)}</b><span>Pasos totales</span></div><div><b>${fmt(sd?sp/sd:0)}</b><span>Media diaria</span></div><div><b>${gd}/7</b><span>Días con meta</span></div></div>
+<h2>Semana <span>${mo(w)} – ${mo(addD(w,6))}</span></h2><div class="sum"><div><b>${ss.length}/${S.routines.length}</b><span>Entrenos</span></div><div><b>${fmt(tv)} kg</b><span>Volumen total</span></div><div><b>${tt} min</b><span>Tiempo entrenando</span></div><div><b>${fmt(sp)}</b><span>Pasos totales</span></div><div><b>${fmt(sd?sp/sd:0)}</b><span>Media diaria</span></div><div><b>${gd}/7</b><span>Días con meta</span></div></div>
 <h2>Volumen por sesión</h2>`+(ss.length?ss.map(s=>`<div class="card"><div class="row"><b>${esc(s.name)}</b><span class="chip">${fmt(vol(s))} kg</span></div><small class="d">${mo(dt(s.date))}</small><div class="bar"><i style="width:${vol(s)/mx*100}%"></i></div></div>`).join(""):'<div class="empty">Sin sesiones esta semana.</div>')}
 const IC={reg:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',rut:'<path d="M4 6h16M4 12h16M4 18h10"/>',prog:'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',res:'<path d="M5 20V10M12 20V4M19 20v-7"/>'};
 const TB=[["reg","Registrar"],["rut","Rutinas"],["prog","Progreso"],["cal","Calendario"],["res","Resumen"]];
 function R(){const v=V==="ses"&&S.cur?sesV():V==="rut"?rutV():V==="prog"?progV():V==="cal"?calV():V==="res"?resV():(V="reg",regV());
-document.getElementById("app").innerHTML=v+`<nav class="tb"><div>${TB.map(t=>`<button class="${V===t[0]||(V==="ses"&&t[0]==="reg")?"on":""}" onclick="setV('${t[0]}')"><svg viewBox="0 0 24 24">${IC[t[0]]}</svg>${t[1]}</button>`).join("")}</div></nav>`}
+const o=document.getElementById("pg"),y=o?o.scrollTop:0;document.getElementById("app").innerHTML=`<div class="page" id="pg"><div class="in">${v}</div></div><nav class="tb"><div>${TB.map(t=>`<button class="${V===t[0]||(V==="ses"&&t[0]==="reg")?"on":""}" onclick="setV('${t[0]}')"><svg viewBox="0 0 24 24">${IC[t[0]]}</svg>${t[1]}</button>`).join("")}</div></nav>`;document.getElementById("pg").scrollTop=TOP?0:y;TOP=false}
 save();R();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script></body></html>
